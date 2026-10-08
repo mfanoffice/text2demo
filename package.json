@@ -1,6 +1,6 @@
 {
   "name": "dsh-deck-workbench",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "private": true,
   "type": "module",
   "description": "把一段口播文案变成可翻页的演示动画，并生成视频标题、标签与三比例封面。本机自用，不上架。",

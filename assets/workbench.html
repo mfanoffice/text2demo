@@ -274,14 +274,14 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="tools/deck-engine.js?v=1.0.12"></script>
-<script src="tools/cover-render.js?v=1.0.12"></script>
-<script src="tools/ai.js?v=1.0.12"></script>
+<script src="tools/deck-engine.js?v=1.0.13"></script>
+<script src="tools/cover-render.js?v=1.0.13"></script>
+<script src="tools/ai.js?v=1.0.13"></script>
 <script>
 /* 引擎自证：页面期望的版本 vs ai.js 实际报出来的版本。对不上就当场说清楚——
    本地脚本被浏览器缓存住时，表现为"按钮有进度字但数字一动不动"，看着像上游挂了。 */
 (function () {
-  var EXPECT = '1.0.12';
+  var EXPECT = '1.0.13';
   window.addEventListener('DOMContentLoaded', function () {
     var got = window.KN_AI_VERSION;
     if (got === EXPECT) return;

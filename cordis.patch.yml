@@ -1,0 +1,5 @@
+# 工作台 bundle patch：把本工作台的服务端入口插入 profile 的插件树。
+# name 必须写 npm 包名，Node 才能解析到安装好的代码。
+- insert:
+    - id: deck-workbench
+      name: 'dsh-deck-workbench'

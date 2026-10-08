@@ -1,0 +1,57 @@
+{
+  "name": "dsh-deck-workbench",
+  "version": "1.0.10",
+  "private": false,
+  "type": "module",
+  "description": "把一段口播文案变成可翻页、可逐步入场的演示动画，并生成视频标题、标签和三比例封面；大模型分镜、8 种视觉主题、文生图封面。",
+  "license": "MIT",
+  "author": "fanyumin",
+  "main": "./dsh/plugin.js",
+  "exports": {
+    ".": "./dsh/plugin.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml"
+  },
+  "files": [
+    "dsh",
+    "lib",
+    "assets",
+    "scripts",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "dsh-desktop-workbenches"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/schemastery": "^3.18.2"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "build:assets": "node scripts/build-assets.mjs",
+    "check:package": "node scripts/check-package.mjs",
+    "prepack": "node scripts/build-assets.mjs && node scripts/check-package.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfanoffice/text2demo.git"
+  }
+}

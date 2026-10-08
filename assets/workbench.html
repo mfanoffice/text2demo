@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>文案转演示素材工作台</title>
+<style>
+  :root{
+    --blue:#007AFF;--green:#34C759;--orange:#FF9500;--red:#FF3B30;
+    --bg:#F2F2F7;--ink:#1C1C1E;--mute:#6E6E73;--line:rgba(28,28,30,.10);
+    --ease:cubic-bezier(.16,1,.3,1);
+    --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;
+       display:flex;flex-direction:column;overflow:hidden}
+  header{display:flex;align-items:center;gap:12px;padding:12px 20px;background:rgba(255,255,255,.84);
+    backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line);flex:none;z-index:5}
+  .brand{font-weight:800;font-size:17px}.brand span{color:var(--blue)}
+  input.name{font:inherit;font-size:13px;font-weight:700;border:1px solid transparent;background:rgba(120,120,128,.10);
+    border-radius:9px;padding:7px 12px;width:280px;color:var(--ink)}
+  input.name:focus{outline:none;background:#fff;border-color:rgba(0,122,255,.5)}
+  .grow{flex:1}
+  .pill{font-size:12px;font-weight:700;color:var(--blue);background:rgba(0,122,255,.10);
+    border:1px solid rgba(0,122,255,.2);padding:4px 11px;border-radius:999px}
+  .pill.off{color:var(--mute);background:rgba(120,120,128,.12);border-color:transparent}
+  .btn{font:inherit;font-size:13px;font-weight:700;color:var(--ink);background:#fff;border:1px solid var(--line);
+    padding:8px 14px;border-radius:11px;cursor:pointer;transition:transform .16s var(--ease),box-shadow .16s var(--ease);
+    text-decoration:none;display:inline-flex;align-items:center}
+  .btn:hover{box-shadow:0 6px 18px -8px rgba(0,0,0,.28);transform:translateY(-1px)}
+  .btn:active{transform:none}
+  .btn.primary{background:var(--blue);color:#fff;border-color:transparent}
+  .btn.ghost{background:rgba(120,120,128,.10);border-color:transparent}
+  .btn.small{font-size:12px;padding:6px 11px;border-radius:9px}
+  .btn[disabled]{opacity:.45;pointer-events:none}
+  main{flex:1;display:flex;min-height:0}
+  aside{width:452px;flex:none;border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;
+    background:rgba(255,255,255,.5)}
+  nav.tabs{display:flex;gap:3px;padding:11px 12px 0;flex:none}
+  nav.tabs button{font:inherit;font-size:13px;font-weight:700;color:var(--mute);background:transparent;border:0;
+    padding:8px 11px;border-radius:10px;cursor:pointer}
+  nav.tabs button:hover{background:rgba(120,120,128,.10)}
+  nav.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .panes{flex:1;overflow:auto;padding:12px;min-height:0}
+  .pane{display:none}.pane.on{display:block;animation:fade .3s var(--ease)}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  textarea,input[type=text],input[type=password],input[type=number],select{font:inherit;font-size:13px;color:var(--ink);
+    background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 12px;width:100%;line-height:1.65}
+  textarea{resize:vertical;min-height:70px}
+  textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(0,122,255,.55);box-shadow:0 0 0 4px rgba(0,122,255,.10)}
+  .row{display:flex;align-items:center;gap:8px;margin:10px 0}
+  .lbl{font-size:12px;font-weight:700;color:var(--mute);flex:none}
+  .hint{font-size:12px;font-weight:600;color:var(--mute);line-height:1.75;margin-top:8px}
+  .hint b{color:var(--ink)}
+  label.f{display:block;margin:8px 0 0}
+  label.f span{display:block;font-size:11.5px;font-weight:700;color:var(--mute);margin-bottom:4px;letter-spacing:.02em}
+  .pg{background:#fff;border-radius:15px;box-shadow:0 1px 3px rgba(0,0,0,.07);margin-bottom:10px;overflow:hidden}
+  .pg-h{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line)}
+  .pg-n{width:24px;height:22px;border-radius:7px;background:rgba(0,122,255,.10);color:var(--blue);
+    font-size:11px;font-weight:800;display:grid;place-items:center;flex:none}
+  .pg-h select{width:118px;padding:5px 8px;font-size:12px;border-radius:8px}
+  .pg-h button{font:inherit;font-size:12px;font-weight:700;color:var(--mute);background:transparent;border:0;
+    width:26px;height:24px;border-radius:7px;cursor:pointer}
+  .pg-h button:hover{background:rgba(120,120,128,.12);color:var(--ink)}
+  .pg-b{padding:10px 11px}
+  ol.titles{list-style:none;display:flex;flex-direction:column;gap:7px;margin-top:10px;padding:0}
+  ol.titles li{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13.5px;
+    font-weight:650;line-height:1.5;display:flex;gap:8px;align-items:flex-start}
+  ol.titles li span.t{flex:1;cursor:pointer}
+  ol.titles li.sel{border-color:rgba(0,122,255,.55);box-shadow:0 0 0 3px rgba(0,122,255,.12)}
+  .card{background:#fff;border-radius:15px;box-shadow:0 1px 3px rgba(0,0,0,.07);padding:13px 15px;margin-top:12px}
+  .card h3{font-size:13px;font-weight:750;margin-bottom:9px}
+  .badges{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;background:rgba(0,122,255,.09);
+    color:var(--blue);cursor:pointer;border:1px solid transparent}
+  .tag:hover{border-color:rgba(0,122,255,.4)}
+  .covers{display:flex;flex-direction:column;gap:11px;margin-top:12px}
+  .vbox{display:flex;align-items:flex-start;gap:10px;margin-top:10px;padding:11px 13px;border-radius:14px;background:#fff}
+  .vbox #deckCheck{flex:1;font-size:12.5px;line-height:1.65;color:var(--ink2);min-width:0}
+  .vk{display:inline-block;font-weight:800;font-size:11.5px;padding:2px 8px;border-radius:8px;margin-right:6px}
+  .vk.ok{background:rgba(52,199,89,.13);color:#1E8E3E}.vk.bad{background:rgba(255,59,48,.12);color:#C4271E}
+  .vk.wait{background:rgba(0,122,255,.1);color:#0A5FCC}
+  .vlist{margin-top:7px;display:flex;flex-direction:column;gap:4px}
+  .vi{font-size:12px;color:var(--ink2);background:var(--bg);border-radius:9px;padding:6px 9px}
+  .vi b{color:var(--blue)}.vi i{font-style:normal;font-weight:700;color:var(--ink);margin-right:4px}
+  .cov{background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .cov img{display:block;width:100%;height:auto;background:var(--bg)}
+  .cov .cap{display:flex;align-items:center;gap:8px;padding:8px 11px;font-size:12px;font-weight:700;color:var(--mute)}
+  /* 出图占位与失败提示：文生图要等、也常失败，状态必须一眼看见 */
+  .cov .ph{display:flex;align-items:center;justify-content:center;min-height:150px;padding:18px;
+    font-size:12.5px;font-weight:700;color:var(--mute);text-align:center;
+    background:repeating-linear-gradient(45deg,#f6f6f8,#f6f6f8 10px,#fff 10px,#fff 20px)}
+  .cov .ph.err{color:#c0341d;background:#fff2f0;line-height:1.6}
+  .stage{flex:1;display:flex;flex-direction:column;min-width:0;padding:14px;gap:9px}
+  .bar{display:flex;align-items:center;gap:8px;flex:none}
+  .frame{flex:1;border-radius:15px;overflow:hidden;background:#0E0E10;min-height:0;box-shadow:0 20px 60px -30px rgba(0,0,0,.55)}
+  iframe{width:100%;height:100%;border:0;display:block}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;place-items:center;z-index:30;backdrop-filter:blur(4px)}
+  .modal.on{display:grid}
+  .sheet{background:#fff;border-radius:20px;width:540px;max-width:92vw;max-height:88vh;overflow:auto;
+    padding:22px 24px;box-shadow:0 40px 90px -30px rgba(0,0,0,.5)}
+  .sheet h2{font-size:17px;font-weight:800;margin-bottom:4px}
+  .sheet p.s{font-size:12.5px;color:var(--mute);font-weight:600;line-height:1.75;margin-bottom:14px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,18px);opacity:0;pointer-events:none;
+    background:rgba(28,28,30,.93);color:#fff;font-size:13px;font-weight:650;padding:11px 18px;border-radius:12px;
+    transition:opacity .28s var(--ease),transform .28s var(--ease);z-index:40;max-width:70vw;text-align:center}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+  .diagline{border-top:1px solid var(--line);padding:9px 0;font-size:12.5px;font-weight:650;line-height:1.6}
+  .diagline:first-child{border-top:0}
+  .diagline code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;background:rgba(120,120,128,.12);
+    padding:2px 6px;border-radius:6px;color:var(--ink)}
+  .diagline span{color:var(--mute);font-weight:600}
+  .prov{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .prov button{font:inherit;font-size:11.5px;font-weight:700;color:var(--blue);background:rgba(0,122,255,.09);border:1px solid transparent;
+    padding:5px 10px;border-radius:999px;cursor:pointer}
+  .prov button:hover{border-color:rgba(0,122,255,.4)}
+  .spin{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.4);
+    border-top-color:#fff;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">文案转演示<span>素材工作台</span></div>
+  <input class="name" id="projName" placeholder="项目名">
+  <span class="grow"></span>
+  <span class="pill off" id="brainState">决策层：手动</span>
+  <button class="btn small ghost" id="btnExport">导出分镜</button>
+  <label class="btn small ghost" style="cursor:pointer">导入<input type="file" id="impFile" accept=".json" hidden></label>
+  <button class="btn small" id="btnSettings">设置大模型</button>
+</header>
+
+<main>
+  <aside>
+    <nav class="tabs" id="tabs">
+      <button class="on" data-p="brief">文案</button>
+      <button data-p="board">分镜</button>
+      <button data-p="deck">演示</button>
+      <button data-p="titles">标题</button>
+      <button data-p="cover">封面</button>
+    </nav>
+    <div class="panes">
+
+      <section class="pane on" id="pane-brief">
+        <textarea id="brief" rows="11" placeholder="把口播文案整段粘进来，不用整理格式。"></textarea>
+        <div class="row">
+          <button class="btn primary" id="btnAIBoard">大模型分镜</button>
+        </div>
+        <div class="hint"><b>大模型分镜</b>＝把你配的模型当决策层，直接产出可编辑的分镜，落到「分镜」页签里，之后随便改。</div>
+      </section>
+
+      <section class="pane" id="pane-board">
+        <div class="row" style="margin-top:0">
+          <span class="hint" id="boardCount" style="margin:0"></span>
+          <span class="grow"></span>
+          <button class="btn small" id="btnAddPage">+ 加一页</button>
+        </div>
+        <div id="pages"></div>
+      </section>
+
+      <section class="pane" id="pane-deck">
+        <div class="row" style="margin-top:0">
+          <button class="btn primary" id="btnBuild">生成演示</button>
+          <button class="btn" id="btnDownload">下载 deck.html</button>
+          <span class="grow"></span>
+          <label class="lbl" for="selTheme" title="整套演示的视觉主题：底色/卡片/字体色。只换外观，不用重新分镜">主题</label>
+          <select id="selTheme" class="pg-t"></select>
+        </div>
+        <div class="hint" id="deckInfo">还没生成。</div>
+        <div class="hint" id="deckCheckHint" style="margin-top:8px">生成后自动校验版式；有问题可以一键复制发我。</div>
+        <div class="vbox"><div id="deckCheck"><span class="vk wait">还没生成</span></div>
+          <button class="btn small ghost" id="btnCopyCheck">复制校验结果</button></div>
+      </section>
+
+      <section class="pane" id="pane-titles">
+        <div class="row" style="margin-top:0">
+          <button class="btn" id="btnLocalTitles">本地模板</button>
+          <button class="btn primary" id="btnAITitles">大模型生成</button>
+          <span class="grow"></span>
+          <button class="btn small ghost" id="btnCopyTitles">复制全部</button>
+        </div>
+        <ol class="titles" id="titleList"></ol>
+        <div class="hint">点标题文字＝复制；点「做封面」＝把这条当封面提示词，并跳到封面页。</div>
+        <div class="card">
+          <div class="row" style="margin:0 0 10px">
+            <h3 style="margin:0">标签</h3><span class="grow"></span>
+            <button class="btn small ghost" id="btnCopyTags">复制全部</button>
+          </div>
+          <div class="badges" id="tagList"></div>
+          <div class="hint" id="tagHint">标签走本地词频统计（去停用词），只保留重复出现的词。</div>
+        </div>
+      </section>
+
+      <section class="pane" id="pane-cover">
+        <div class="hint" style="margin:0 0 6px"><b>封面完全交给文生图模型画</b>：先在上面选中一条标题当提示词，也能再补一句画面描述，点「生成封面」才出图，按三个比例各生成一张。</div>
+        <div class="hint" id="coverSrc" style="margin:0 0 8px">当前提示词来源：<b>还没选标题</b></div>
+        <label class="f"><span>标题（已被当作提示词）</span><input id="cL1" type="text" placeholder="先在「标题」里选中一条，或直接写"></label>
+        <label class="f"><span>补充提示词（可选）</span><input id="cPrompt" type="text" placeholder="例如：极简科技风，蓝紫色渐变，留白多"></label>
+        <div class="row">
+          <button class="btn primary" id="btnCovers">生成封面图（三比例）</button>
+          <button class="btn small ghost" id="btnCopyCover">复制提示词</button>
+        </div>
+        <div class="hint" id="imgHint"></div>
+        <div class="covers" id="coverOut"></div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn small ghost" id="btnImgSettings">设置图像模型</button>
+          <span class="hint" style="margin:0" id="imgCfgCurrent"></span>
+        </div>
+      </section>
+
+    </div>
+  </aside>
+
+  <div class="stage">
+    <div class="bar">
+      <span class="hint" id="stageInfo" style="margin:0">右侧是生成的演示预览</span>
+      <span class="grow"></span>
+      <button class="btn small ghost" id="btnReload">重载</button>
+      <a class="btn small ghost" id="btnNewTab" target="_blank" rel="noopener">新窗口打开</a>
+    </div>
+    <div class="frame"><iframe id="deck" title="演示预览"></iframe></div>
+  </div>
+</main>
+
+<div class="modal" id="settings">
+  <div class="sheet">
+    <h2>大模型设置（OpenAI 兼容）</h2>
+    <p class="s">填 <b>base_url</b>（OpenAI 兼容，末尾到 /v1 或厂商的版本段为止，<b>不要再带 /chat/completions</b>）。<br>
+      密钥只写进这台机器的 localStorage，请求直接发给你填的地址——<b>不要发给我</b>。</p>
+    <div class="prov" id="provList">
+      <button data-b="https://api.deepseek.com/v1">DeepSeek</button>
+      <button data-b="https://api.moonshot.cn/v1">Kimi</button>
+      <button data-b="https://open.bigmodel.cn/api/paas/v4">智谱</button>
+      <button data-b="https://dashscope.aliyuncs.com/compatible-mode/v1">通义</button>
+      <button data-b="http://127.0.0.1:8787/v1">本地代理 8787</button>
+      <button data-b="http://127.0.0.1:11434/v1">Ollama 本机</button>
+      <button data-b="http://127.0.0.1:1234/v1">LM Studio 本机</button>
+    </div>
+    <label class="f"><span>接口地址（base_url，末尾带 /v1）</span><input id="sBase" type="text"></label>
+    <label class="f"><span>模型名</span><input id="sModel" type="text" placeholder="qwen2.5:7b / gpt-4o-mini / deepseek-chat"></label>
+    <label class="f"><span>密钥（本地接口可留空）</span><input id="sKey" type="password" autocomplete="off" placeholder="留空即可"></label>
+    <label class="f"><span>温度（分镜 0.4–0.7，标题可 0.9）</span><input id="sTemp" type="number" step="0.1" min="0" max="1.5"></label>
+    <div class="row">
+      <button class="btn primary" id="btnSaveCfg">保存</button>
+      <button class="btn" id="btnPing">测试连接</button>
+      <button class="btn small ghost" id="btnCopyDiag">复制诊断（不含密钥）</button>
+      <span class="grow"></span>
+      <button class="btn small ghost" id="btnCloseCfg">关闭</button>
+    </div>
+    <div class="hint" id="pingOut"></div>
+  </div>
+</div>
+
+<div class="modal" id="imgsettings">
+  <div class="sheet">
+    <h2>图像模型设置（OpenAI Image 兼容）</h2>
+    <p class="s">文生图模型<b>单独填</b>，和对话模型互不影响——出图常常是另一家服务、另一个密钥。地址就是 <b>base_url</b>（到 /v1 为止，别带 /images/generations）。<br>
+      密钥只写进这台机器的 localStorage，请求直接发给你填的地址——<b>不要发给我</b>。</p>
+    <label class="f"><span>图像接口地址（base_url，末尾带 /v1）</span><input id="iBase" type="text" placeholder="https://api.openai.com/v1"></label>
+    <label class="f"><span>图像模型名</span><input id="iModel" type="text" placeholder="gpt-image-1 / dall-e-3 / flux-schnell …"></label>
+    <label class="f"><span>密钥（本地接口可留空）</span><input id="iKey" type="password" autocomplete="off" placeholder="留空即可"></label>
+    <label class="f"><span>风格后缀（自动接在提示词后面，可留空）</span><input id="iSuffix" type="text"></label>
+    <div class="hint" style="margin:2px 0 10px">三比例的出图尺寸由本地控制：模型回来的图会<b>居中裁</b>成 16:9（1920×1080）、4:3（1440×1080）、3:4（1080×1440），所以模型返回什么尺寸都不影响成品比例。</div>
+    <div class="row">
+      <button class="btn primary" id="btnSaveImg">保存</button>
+      <button class="btn" id="btnImgPing">测试连接（只查模型名，不烧图）</button>
+      <span class="grow"></span>
+      <button class="btn small ghost" id="btnCloseImgCfg">关闭</button>
+    </div>
+    <div class="hint" id="imgPingOut"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="tools/deck-engine.js?v=1.0.10"></script>
+<script src="tools/cover-render.js?v=1.0.10"></script>
+<script src="tools/ai.js?v=1.0.10"></script>
+<script>
+/* 引擎自证：页面期望的版本 vs ai.js 实际报出来的版本。对不上就当场说清楚——
+   本地脚本被浏览器缓存住时，表现为"按钮有进度字但数字一动不动"，看着像上游挂了。 */
+(function () {
+  var EXPECT = '1.0.10';
+  window.addEventListener('DOMContentLoaded', function () {
+    var got = window.KN_AI_VERSION;
+    if (got === EXPECT) return;
+    var el = document.createElement('div');
+    el.style.cssText = 'background:#3a1d1d;color:#ffb4b4;border:1px solid #7a3030;border-radius:8px;padding:10px 12px;margin:10px 12px;font-size:13px;line-height:1.5';
+    el.innerHTML = '⚠ <b>引擎脚本是旧缓存</b>：页面期望 <code>' + EXPECT + '</code>，实际加载的 ai.js 报 <code>' +
+      (got || '无版本号（更旧的脚本）') + '</code>。<br>现在点分镜会一直卡在「已收 0 字」或走回老的非流式超时路径。' +
+      '按 <b>Cmd+Shift+R</b>（Windows 用 Ctrl+F5）强制刷新后再点。';
+    document.body.insertBefore(el, document.body.firstChild);
+  });
+})();
+</script>
+
+<script>
+var $ = function (s) { return document.querySelector(s); };
+var $$ = function (s) { return [].slice.call(document.querySelectorAll(s)); };
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+/* ---------------------------------------------------------------- 默认分镜 */
+var SEED = { title: '未命名项目', pages: [DeckEngine.blank()] };
+
+
+/* ------------------------------------------------------------------ 状态 */
+var LS = {
+  get: function (k, d) { try { var v = localStorage.getItem('knote.' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set: function (k, v) { try { localStorage.setItem('knote.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+var SB = LS.get('sb', null) || JSON.parse(JSON.stringify(SEED));
+var TITLES = LS.get('titles', []);
+var AI_TAGS = LS.get('aitags', []);
+var COVER = LS.get('cover', { l1: '', prompt: '' });
+var CFG = AI.load();
+var selTitle = LS.get('selTitle', -1);
+
+function persist() { LS.set('sb', SB); LS.set('titles', TITLES); LS.set('cover', COVER); }
+/* 封面不再属于分镜（它在「封面」页签单独做）。旧数据里若还有封面页，载入时清掉。 */
+function stripCoverPages() {
+  var n = SB.pages.length;
+  SB.pages = SB.pages.filter(function (p) { return p && p.type !== 'cover'; });
+  if (SB.pages.length !== n) {
+    if (!SB.pages.length) SB.pages = [DeckEngine.blank()];
+    persist();
+    toast('已去掉分镜里的 ' + (n - SB.pages.length) + ' 个封面页——封面在「封面」页签单独做', 6000);
+  }
+}
+function toast(m, ms) { var t = $('#toast'); t.textContent = m; t.classList.add('on');
+  clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove('on'); }, ms || 2000); }
+function switchTab(p) {
+  $$('#tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.p === p); });
+  $$('.pane').forEach(function (x) { x.classList.toggle('on', x.id === 'pane-' + p); });
+}
+
+/* ------------------------------------------------------------------ 设置 */
+function openCfg() {
+  $('#sBase').value = CFG.base; $('#sModel').value = CFG.model;
+  $('#sKey').value = CFG.key; $('#sTemp').value = CFG.temp;
+  $('#settings').classList.add('on');
+}
+$('#btnSettings').onclick = openCfg;
+$('#btnCloseCfg').onclick = function () { $('#settings').classList.remove('on'); };
+$('#settings').onclick = function (e) { if (e.target === $('#settings')) $('#settings').classList.remove('on'); };
+$('#btnSaveCfg').onclick = function () {
+  var base = $('#sBase').value.trim(), model = $('#sModel').value.trim();
+  if (!base) { toast('先填接口地址 base_url'); $('#sBase').focus(); return; }
+  var fix = AI.normBase(base);
+  if (fix !== base) { $('#sBase').value = fix; toast('地址里多写的部分我去掉了：' + fix, 5000); }
+  if (!model) { toast('还差模型名：先点「测试连接」，通了会列出这台服务可用的模型，点一下即可', 8000); return; }
+  CFG = { base: fix, model: model, key: $('#sKey').value,
+          temp: parseFloat($('#sTemp').value) || 0.6, enabled: true };
+  AI.save(CFG); brainState(); toast('已保存');
+  setTimeout(function () { $('#settings').classList.remove('on'); }, 600);
+};
+$('#provList').onclick = function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  $('#sBase').value = b.dataset.b; toast('已填入 ' + b.dataset.b + '，再点保存');
+};
+var LAST_DIAG = '';
+function fixHint(r) {
+  var v = (r.results[0] || {}).verdict;
+  if (v === 'cors') return '这家接口不支持浏览器直连（响应里没有 Access-Control-Allow-Origin）。双击 keynote-workbench/启动本地代理.command，再把下面的地址改成 http://127.0.0.1:8787/v1 —— 代理是服务器到服务器发请求，不受跨域限制。';
+  if (v === 'unreachable' || v === 'timeout') return '连不上：先确认域名拼写、这台机器能不能打开该网站、是否需要代理。也可以先用 Ollama 本机接口试通链路。';
+  if (v === 'http') return '地址能通但返回了异常状态码：多半是路径不对（base_url 只需写到 /v1 或厂商版本段）。';
+  return '把上面那行原文发我，我按它定位。';
+}
+$('#btnPing').onclick = function () {
+  var out = $('#pingOut');
+  var cfg = { base: $('#sBase').value, model: $('#sModel').value.trim(), key: $('#sKey').value, temp: 0 };
+  var cands = AI.candidates(cfg.base);
+  if (!cands.length) { out.textContent = '还没填接口地址'; return; }
+  out.innerHTML = '<span class="spin"></span>正在探测 ' + cands.length + ' 个候选地址（最多约 15 秒，连不上时会等到超时）…';
+  AI.probe(cfg).then(function (r) {
+    var rows = r.results.map(function (x) {
+      var tag = x.ok ? (x.verdict === 'ok' ? '✅ 通，密钥有效'
+                    : x.verdict === 'auth' ? '⚠️ 地址通、能跨域，密钥不对'
+                    : '⚠️ 地址通，HTTP ' + x.status)
+              : (x.verdict === 'cors' ? '⛔ 被浏览器拦下（CORS）' : '❌ 连不上');
+      return '<div class="diagline"><b>' + tag + '</b> <code>' + esc(x.base) + '</code>（' + x.ms + 'ms）<br><span>' +
+        esc(x.msg || x.err || '') + '</span></div>';
+    }).join('');
+    var extra = '';
+    if (r.ok && r.best && r.best.models && r.best.models.length) {
+      extra += '<div class="hint">这台服务可用的模型（点一下填进模型名）：</div><div class="prov">' +
+        r.best.models.map(function (m) { return '<button data-m="' + esc(m) + '">' + esc(m) + '</button>'; }).join('') + '</div>';
+    }
+    if (r.ok && r.best && AI.normBase(cfg.base) !== r.best.base) {
+      extra += '<div class="row"><button class="btn small primary" id="btnUseBase">把地址改成 ' + esc(r.best.base) + '</button></div>';
+    } else if (!r.ok) {
+      extra += '<div class="hint">' + esc(fixHint(r)) + '</div>';
+      if ((r.results[0] || {}).verdict === 'cors') {
+        extra += '<div class="row"><button class="btn small primary" id="btnUseProxy">改用本地代理地址 http://127.0.0.1:8787/v1</button></div>';
+      }
+    } else if (r.best && r.best.verdict === 'auth') {
+      extra += '<div class="hint">地址和跨域都没问题，<b>问题在密钥或权限</b>：确认密钥没过期、没多余空格、这个 key 有该模型的权限。</div>';
+    } else {
+      extra += '<div class="hint">地址通了。填上模型名再点保存就能用；如果调用仍失败，多半是<b>模型名</b>和服务商列出的不一致。</div>';
+    }
+    out.innerHTML = rows + extra;
+    LAST_DIAG = 'base_url: ' + cfg.base + '\nmodel: ' + (cfg.model || '(空)') + '\n' + r.results.map(function (x) {
+      return '- ' + x.base + ' → ' + (x.msg || x.err) + ' (' + x.ms + 'ms)';
+    }).join('\n');
+    var ub = document.getElementById('btnUseBase');
+    if (ub) ub.onclick = function () { $('#sBase').value = r.best.base; toast('已填入，记得点保存'); };
+    var pb = document.getElementById('btnUseProxy');
+    if (pb) pb.onclick = function () { $('#sBase').value = 'http://127.0.0.1:8787/v1';
+      toast('已填入代理地址。先双击 keynote-workbench/启动本地代理.command 把代理跑起来', 9000); };
+    [].forEach.call(out.querySelectorAll('.prov button[data-m]'), function (mb) {
+      mb.onclick = function () { $('#sModel').value = mb.dataset.m; toast('模型名已填入：' + mb.dataset.m); };
+    });
+  });
+};
+$('#btnCopyDiag').onclick = function () {
+  if (!LAST_DIAG) return toast('先点一次「测试连接」');
+  copy(LAST_DIAG, '诊断信息已复制（不含密钥），可以贴给我');
+};
+function brainState() {
+  var on = CFG.enabled && CFG.base && CFG.model;
+  var el = $('#brainState');
+  el.className = 'pill' + (on ? '' : ' off');
+  el.textContent = on ? '决策层：' + CFG.model : '决策层：手动';
+}
+
+/* ------------------------------------------------------------------ Tab */
+$('#tabs').onclick = function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  switchTab(b.dataset.p);
+};
+
+/* ------------------------------------------------------------ 分镜编辑器 */
+var FIELDS = {
+  custom: [['kicker', '小标签（可选）'], ['html', '本页结构 + 图示（HTML/SVG，可自由设计）'], ['css', '本页 CSS（只作用于本页）']],
+  cover: [['kicker', '顶部小字'], ['title', '大标题'], ['sub', '副标题'], ['mark', '中心字母'], ['items', '落款（第一行）']],
+  points: [['kicker', '小字标签'], ['title', '本页观点'], ['items', '每行：要点|说明']],
+  equation: [['kicker', '小字标签'], ['title', '疑问句'], ['items', '两行：左侧|副标题 ／ 右侧|副标题'], ['op', '中间符号（= 或 ≠）'], ['mark', '右上角符号']],
+  neq: [['kicker', '小字标签'], ['title', '结论'], ['items', '每行一句（2–3 行）'], ['caption', '署名']],
+  facts: [['kicker', '小字标签'], ['title', '主题'], ['items', '每行：事实|说明|颜色'], ['caption', '底部说明'], ['mark', '中心字母']],
+  local: [['kicker', '小字标签'], ['title', '主题'], ['items', '每行：条目|颜色'], ['folder', '本地路径'], ['badge', '红色警示词'], ['caption', '补充']],
+  flow: [['kicker', '小字标签'], ['title', '主题'], ['items', '每行：节点|颜色'], ['caption', '能力清单（、分隔）']],
+  hub: [['kicker', '小字标签'], ['title', '主题'], ['items', '每行：卫星|说明|颜色'], ['mark', '中心字母']],
+  cards: [['kicker', '小字标签'], ['title', '主题'], ['items', '每行：卡片标题|说明|颜色']]
+};
+var LONG = { items: 1, html: 2, css: 2 };
+var COLORRE = /(blue|green|orange|red)$/;
+
+function renderPages() {
+  var box = $('#pages'); box.innerHTML = '';
+  SB.pages.forEach(function (p, i) {
+    var d = document.createElement('div'); d.className = 'pg'; d.dataset.i = i;
+    var types = (DeckEngine.CONTENT_TYPES || DeckEngine.TYPES).slice();
+    if (p.type === 'cover') types = ['cover'].concat(types);   // 旧分镜里的封面页仍可编辑，防止下拉框对不上
+    var opts = types.map(function (t) {
+      return '<option value="' + t + '"' + (t === p.type ? ' selected' : '') + '>' + DeckEngine.TYPE_LABEL[t] + '</option>';
+    }).join('');
+    d.innerHTML = '<div class="pg-h"><span class="pg-n">' + ('0' + (i + 1)).slice(-2) + '</span>' +
+      '<select class="pg-t">' + opts + '</select><span class="grow"></span>' +
+      '<button data-act="up" title="上移">↑</button><button data-act="down" title="下移">↓</button>' +
+      '<button data-act="dup" title="复制">⧉</button><button data-act="del" title="删除">✕</button></div>' +
+      '<div class="pg-b"></div>';
+    box.appendChild(d);
+    fillFields(d.querySelector('.pg-b'), p);
+    d.querySelector('.pg-t').onchange = function () { p.type = this.value; fillFields(d.querySelector('.pg-b'), p); persist(); };
+    [].slice.call(d.querySelectorAll('.pg-h button')).forEach(function (b) {
+      b.onclick = function () {
+        var a = b.dataset.act;
+        if (a === 'up' && i > 0) { SB.pages.splice(i - 1, 0, SB.pages.splice(i, 1)[0]); }
+        else if (a === 'down' && i < SB.pages.length - 1) { SB.pages.splice(i + 1, 0, SB.pages.splice(i, 1)[0]); }
+        else if (a === 'dup') { SB.pages.splice(i + 1, 0, JSON.parse(JSON.stringify(p))); }
+        else if (a === 'del') { SB.pages.splice(i, 1); }
+        else return;
+        persist(); renderPages();
+      };
+    });
+  });
+  $('#boardCount').innerHTML = '共 <b>' + SB.pages.length + '</b> 页';
+}
+
+function fillFields(box, p) {
+  box.innerHTML = '';
+  (FIELDS[p.type] || []).forEach(function (f) {
+    var k = f[0], label = f[1];
+    var wrap = document.createElement('label'); wrap.className = 'f';
+    wrap.innerHTML = '<span>' + label + '</span>';
+    var el = document.createElement(LONG[k] ? 'textarea' : 'input');
+    if (LONG[k]) el.rows = 4; else el.type = 'text';
+    el.value = p[k] == null ? '' : p[k];
+    el.oninput = function () { p[k] = el.value; persist(); };
+    wrap.appendChild(el); box.appendChild(wrap);
+  });
+}
+
+$('#btnAddPage').onclick = function () { SB.pages.push(DeckEngine.blank()); persist(); renderPages(); };
+/* 项目名留空时，用首页标题兜一个，省得每次都叫「未命名项目」 */
+function autoTitle() {
+  var cur = $('#projName').value.trim();
+  if (cur && cur !== '未命名项目') return;
+  var t = (SB.pages[0] && (SB.pages[0].title || SB.pages[0].kicker)) || '';
+  if (!t) return;
+  SB.title = t.replace(/[。！？]$/, '').slice(0, 24);
+  $('#projName').value = SB.title;
+  persist();
+}
+$('#projName').value = SB.title || '';
+$('#projName').oninput = function () { SB.title = this.value; persist(); };
+
+/* -------------------------------------------------------------- 决策层 */
+function needCfg() {
+  if (CFG.enabled && CFG.base && CFG.model) return false;
+  openCfg();
+  toast(!CFG.base ? '还没填接口地址' : (!CFG.model ? '还没填模型名（点「测试连接」可列出可用模型）' : '先保存大模型设置'), 6000);
+  return true;
+}
+$('#btnAIBoard').onclick = function () {
+  var text = $('#brief').value.trim();
+  if (!text) return toast('先粘文案');
+  if (needCfg()) return;
+  var b = this; b.disabled = true;
+  var t0 = Date.now(), painted = 0;
+  /* 流式收字：按钮上实时报进度。它同时是「连接还活着」的证据——
+     只要这行数字在涨，上游就在吐字，超时就与我们无关。 */
+  function progress(s) {
+    var now = Date.now();
+    if (now - painted < 200) return;                      // 别为每个分片刷一次 DOM
+    painted = now;
+    var pages = (String(s.text || '').match(/"type"\s*:/g) || []).length;
+    b.innerHTML = '<span class="spin"></span>版式设计 ' + Math.round((now - t0) / 1000) + 's · 已收 ' +
+      (s.chars || 0) + ' 字' + (pages ? ' · 约 ' + pages + ' 页' : '') +
+      (s.reasoning ? '（模型思考中 ' + s.reasoning + ' 字）' : '');
+  }
+  progress({ chars: 0 });
+  AI.storyboard(CFG, text, Math.min(9, Math.max(6, Math.round(text.length / 140))), progress, { theme: SB.theme || 'keynote' }).then(function (pages) {
+    SB.pages = pages.filter(function (p) { return p.type !== 'cover'; }); persist(); renderPages(); renderTags(); autoTitle();
+    toast('模型设计好 ' + SB.pages.length + ' 页（' + Math.round((Date.now() - t0) / 1000) + ' 秒），正在生成并校验');
+    buildDeck();                        // 直接出片，让本地校验器立刻量一遍
+    switchTab('deck');
+  }).catch(function (e) { toast('失败：' + e.message, 8000); })
+    .then(function () { b.disabled = false; b.textContent = '大模型分镜'; });
+};
+
+/* ---------------------------------------------------------------- 主题 */
+/* 主题选择放在演示页签：分镜阶段看不出主题（分镜只有文字），主题影响的是最终观感；
+   模型页子只写 CSS 变量，所以换主题重新「生成演示」即整套换装，不用重新分镜。 */
+function fillThemes() {
+  var el = $('#selTheme'); if (!el) return;
+  el.innerHTML = DeckEngine.THEME_ORDER.map(function (t) {
+    return '<option value="' + t + '">' + esc(DeckEngine.THEMES[t].label) + '</option>';
+  }).join('');
+  el.value = SB.theme && DeckEngine.THEMES[SB.theme] ? SB.theme : 'keynote';
+  el.onchange = function () {
+    SB.theme = this.value; persist();
+    if (deckURL) { buildDeck(); toast('已换成「' + DeckEngine.THEMES[SB.theme].label + '」'); }
+    else toast('已选「' + DeckEngine.THEMES[SB.theme].label + '」，点生成演示出片');
+  };
+}
+
+/* ---------------------------------------------------------------- 出片 */
+var deckURL = null;
+/* 校验结果：生成的演示会自己量一遍版式，把问题 postMessage 回来。
+   越界 / 文字掉进字幕区 / 忘了入场动画 / 入场后没有注视动画，全在这里报。 */
+var CHECK = null;
+window.addEventListener('message', function (e) {
+  var d = e.data;
+  if (!d || d.knote !== 'check') return;
+  CHECK = d;
+  renderCheck();
+});
+function renderCheck() {
+  var el = $('#deckCheck'); if (!el) return;
+  if (!CHECK) { el.innerHTML = '<span class="vk wait">校验中…</span>'; return; }
+  if (!CHECK.total) { el.innerHTML = '<span class="vk ok">校验通过</span> ' + CHECK.pages + ' 页：无越界、无文字入侵字幕区、每页都有入场与循环动画。'; return; }
+  var names = { overflow: '跑出舞台', safe: '进了字幕安全区', noanim: '缺入场动画', noidle: '缺循环注视动画', empty: '空页' };
+  el.innerHTML = '<span class="vk bad">' + CHECK.total + ' 个问题</span> 点「复制校验结果」发给我，我按行改：<div class="vlist">' +
+    CHECK.issues.map(function (x) {
+      return '<div class="vi"><b>P' + x.page + '</b> <i>' + (names[x.kind] || x.kind) + '</i> ' + esc(x.detail) + '</div>';
+    }).join('') + '</div>';
+}
+$('#btnCopyCheck').onclick = function () {
+  if (!CHECK) return toast('还没有校验结果');
+  var names = { overflow: '跑出舞台', safe: '进了字幕安全区', noanim: '缺入场动画', noidle: '缺循环注视动画', empty: '空页' };
+  var txt = '演示校验（' + CHECK.pages + ' 页，' + CHECK.total + ' 个问题）\n' +
+    CHECK.issues.map(function (x) { return 'P' + x.page + ' ' + (names[x.kind] || x.kind) + '：' + x.detail; }).join('\n');
+  copy(txt); toast('校验结果已复制，发给我即可');
+};
+function buildDeck() {
+  var html = DeckEngine.build(SB);
+  if (deckURL) URL.revokeObjectURL(deckURL);
+  deckURL = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+  $('#deck').src = deckURL;
+  $('#btnNewTab').href = deckURL;
+  var n = SB.pages.length;
+  $('#deckInfo').innerHTML = '已生成 <b>' + n + '</b> 页 · ' + (html.length / 1024).toFixed(1) + ' KB · 单文件零依赖。<br>' +
+    '右侧预览：<b>空格</b> 逐步入场，<b>← →</b> 翻页，<b>R</b> 重播本页。';
+  CHECK = null; renderCheck();
+  $('#stageInfo').innerHTML = '预览：<b>' + esc(SB.title || '演示') + '</b> · ' + n + ' 页';
+  return html;
+}
+$('#btnBuild').onclick = function () { buildDeck(); toast('已生成'); };
+$('#btnReload').onclick = function () { if (deckURL) { var f = $('#deck'); f.src = 'about:blank'; setTimeout(function () { f.src = deckURL; }, 60); } };
+$('#btnDownload').onclick = function () {
+  var html = buildDeck();
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+  a.download = (SB.title || 'deck').replace(/[\\/:*?"<>|]/g, '_') + '.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('已下载');
+};
+
+/* -------------------------------------------------------------- 标题 */
+function drawTitles() {
+  $('#titleList').innerHTML = TITLES.map(function (t, i) {
+    return '<li' + (i === selTitle ? ' class="sel"' : '') + ' data-i="' + i + '">' +
+      '<span class="t">' + esc(t) + '</span>' +
+      '<button class="btn small ghost" data-copy="' + i + '" title="复制这条标题">复制</button>' +
+      '<button class="btn small ghost" data-cov="' + i + '" title="把这条当封面提示词，并跳到封面页">做封面</button></li>';
+  }).join('') || '<li style="color:#8E8E93;font-weight:600">还没有标题，点上面两个按钮生成。</li>';
+}
+/* 点标题本身＝选中，并立刻把封面文案跟着换掉（这才是「我选了一条」的意思） */
+$('#titleList').onclick = function (e) {
+  var c = e.target.closest('button[data-copy]');
+  if (c) { copy(TITLES[+c.dataset.copy], '标题已复制'); return; }
+  var b = e.target.closest('button[data-cov]');
+  if (b) { selTitle = +b.dataset.cov; drawTitles(); coverFromTitle(); switchTab('cover'); return; }
+  var li = e.target.closest('li[data-i]');
+  if (li) {
+    selTitle = +li.dataset.i; drawTitles(); coverFromTitle();
+    LS.set('selTitle', selTitle);
+  }
+};
+$('#btnCopyTitles').onclick = function () { if (TITLES.length) copy(TITLES.map(function (t, i) { return (i + 1) + '. ' + t; }).join('\n'), '已复制'); else toast('还没有标题'); };
+
+function sourceText() {
+  var b = $('#brief').value.trim();
+  if (b) return b;
+  // 没粘文案时从分镜回捞：洗掉 items 的语法标记（| 和颜色名）
+  var heads = SB.pages.map(function (p) { return p.title || ''; }).join('。');
+  var body = SB.pages.map(function (p) {
+    var title = String(p.title || '');
+    return String(p.items || '').split('\n').map(function (line) {
+      var parts = line.split('|');
+      var head = (parts[0] || '').replace(/\s/g, '');
+      // items 的第一段常常就是本页标题，重复计入会造出「官方仓库」这类假高频碎片
+      if (head && parts.length > 1 && title.indexOf(head.slice(0, Math.min(4, head.length))) >= 0) parts.shift();
+      return parts.join('，');
+    }).join('，');
+  }).join('。');
+  return heads + '。' + body;
+}
+var localBatch = 0;
+function localTitles() {
+  var text = sourceText();
+  var kw = DeckEngine.keywords(text, 6);
+  var topic = (SB.title || '').split(/[×x·|]/)[0].trim() || kw[0] || '它';
+  var A = kw[0] || '同类工具', B = kw[1] || '看起来那样', C = kw[2] || '细节', D = kw[3] || '实测';
+  var batches = [
+    [ topic + '，真不是' + B + '？', '我原以为它是' + B + '，实测后改口了', '别急着给 ' + topic + ' 下结论',
+      topic + ' ≠ ' + A + '：真实定位', '三分钟看懂 ' + topic + '：' + kw.slice(0, 3).join('、'),
+      topic + ' 的 5 个关键事实', A + ' vs ' + D + '：到底差在哪', '想搞清楚 ' + topic + '？先看这三点' ],
+    [ '上手 ' + topic + '：' + A + '、' + B + '、' + C + ' 全试了一遍', topic + ' 值得用吗？先说结论',
+      A + '、' + B + '、' + C + '：' + topic + ' 的三个真相', '花了两天，把 ' + topic + ' 摸清了',
+      topic + ' 实测：优点很明显，坑也有', '同样是 ' + A + '，' + topic + ' 差在哪',
+      '我把 ' + topic + ' 和 ' + A + ' 放一起比了比', topic + ' 值不值得上手？看这 5 点' ],
+    [ topic + ' 入门：先搞懂这 3 件事', '关于 ' + topic + '，多数人不知道的 ' + A,
+      topic + ' 完整拆解：从 ' + A + ' 到 ' + C, '一次讲清 ' + topic + '：' + kw.slice(0, 4).join('、'),
+      '收藏级：' + topic + ' 的使用清单', topic + ' 怎么用才不踩坑',
+      '从 0 上手 ' + topic + '：一步步来', A + '、' + C + '、' + D + '：' + topic + ' 关键词全解' ]
+  ];
+  TITLES = batches[localBatch % batches.length].filter(function (s) { return s.length > 4; });
+  localBatch++;
+  selTitle = -1; drawTitles(); renderTags(); LS.set('titles', TITLES);
+  toast('本地模板第 ' + Math.min(localBatch, 3) + ' 批（垫底用，不保证点击欲）');
+}
+$('#btnLocalTitles').onclick = localTitles;
+var tagTimer = null;
+$('#brief').addEventListener('input', function () { clearTimeout(tagTimer); tagTimer = setTimeout(renderTags, 400); });
+$('#btnAITitles').onclick = function () {
+  var text = sourceText();
+  if (!text) return toast('先粘文案');
+  if (needCfg()) return;
+  var b = this; b.disabled = true; b.innerHTML = '<span class="spin"></span>生成中…';
+  AI.titlesAndTags(CFG, text, 8).then(function (r) {
+    TITLES = r.titles; AI_TAGS = r.tags; selTitle = -1;
+    LS.set('titles', TITLES); LS.set('aitags', AI_TAGS);
+    drawTitles(); renderTags();
+    toast('大模型给了 ' + r.titles.length + ' 条标题 · ' + r.tags.length + ' 个标签');
+  }).catch(function (e) { toast('失败：' + e.message, 6000); })
+    .then(function () { b.disabled = false; b.textContent = '大模型生成'; });
+};
+
+/* -------------------------------------------------------------- 标签 */
+function renderTags() {
+  var local = !(AI_TAGS && AI_TAGS.length);
+  var kw = local ? DeckEngine.keywords(sourceText(), 12) : AI_TAGS;
+  $('#tagList').innerHTML = kw.map(function (k) { return '<span class="tag" data-k="' + esc(k) + '">' + esc(k) + '</span>'; }).join('') ||
+    '<span class="hint">文案里的词都只出现一次，本地统计挑不出标签——用大模型生成。</span>';
+  $('#tagHint').textContent = local
+    ? '本地统计：只保留重复出现的词，宁少不脏。想要真正贴题的标签，用「大模型生成」。'
+    : '标签来自大模型（和标题同一次请求）。';
+}
+$('#tagList').onclick = function (e) { var t = e.target.closest('.tag'); if (t) copy(t.dataset.k, '已复制'); };
+$('#btnCopyTags').onclick = function () {
+  var all = [].slice.call(document.querySelectorAll('#tagList .tag')).map(function (t) { return t.dataset.k; });
+  if (all.length) copy(all.join(' '), '标签已复制'); else toast('还没有标签');
+};
+
+/* -------------------------------------------------------------- 封面（文生图）
+   封面设计完全交给文生图模型：选中的标题＝提示词，可再补一句，点「生成封面图」才出图。
+   三个比例各请求一次（各自带自己的 size），模型回来的图在本地居中裁成精确比例。 */
+var IMGCFG = AI.imgLoad();
+var coverEdited = LS.get('coverEdited', false);
+
+function coverFromTitle() {
+  if (!TITLES.length) return toast('先在「标题」里生成几条');
+  if (selTitle < 0 || selTitle >= TITLES.length) { selTitle = 0; drawTitles(); }
+  LS.set('selTitle', selTitle);
+  COVER.l1 = String(TITLES[selTitle]).replace(/\s+/g, ' ').trim();
+  coverEdited = false; LS.set('coverEdited', false);
+  fillCover(); persist();
+  toast('提示词已换成「' + COVER.l1.slice(0, 18) + '…」，可以直接生成，也能再补一句', 5000);
+}
+function coverSrcLabel() {
+  var el = $('#coverSrc'); if (!el) return;
+  var from = (selTitle >= 0 && TITLES[selTitle]) ? '<b>' + esc(TITLES[selTitle]) + '</b>' : '<b>手动填写</b>';
+  el.innerHTML = '当前提示词来源：' + from + (coverEdited ? '（已手动改写）' : '');
+}
+function fillCover() {
+  coverSrcLabel();
+  var t = $('#cL1'); if (t) t.value = COVER.l1 || '';
+  var p = $('#cPrompt'); if (p) p.value = COVER.prompt || '';
+  imgCfgLabel();
+}
+function imgCfgLabel() {
+  var el = $('#imgCfgCurrent'); if (!el) return;
+  el.textContent = IMGCFG.model
+    ? '当前图像模型：' + IMGCFG.model + ' @ ' + AI.normBase(IMGCFG.base)
+    : '还没配图像模型——点左边的「设置图像模型」';
+}
+function finalPrompt() {
+  var t = String(COVER.l1 || '').trim();
+  var extra = String(COVER.prompt || '').trim();
+  var suffix = String(IMGCFG.suffix || '').trim();
+  return [t, extra, suffix].filter(Boolean).join('，');
+}
+['cL1', 'cPrompt'].forEach(function (id) {
+  var el = document.getElementById(id); if (!el) return;
+  el.addEventListener('input', function () {
+    COVER[id === 'cL1' ? 'l1' : 'prompt'] = el.value;
+    coverEdited = true; LS.set('coverEdited', true);
+    coverSrcLabel(); persist();
+  });
+});
+$('#btnCopyCover').onclick = function () {
+  var s = finalPrompt();
+  if (!s) return toast('提示词还是空的');
+  copy(s, '提示词已复制（含风格后缀）');
+};
+
+/* 图像模型设置弹窗 */
+function openImgCfg() {
+  $('#iBase').value = IMGCFG.base; $('#iModel').value = IMGCFG.model;
+  $('#iKey').value = IMGCFG.key; $('#iSuffix').value = IMGCFG.suffix || '';
+  $('#imgPingOut').textContent = '';
+  $('#imgsettings').classList.add('on');
+}
+$('#btnImgSettings').onclick = openImgCfg;
+$('#btnCloseImgCfg').onclick = function () { $('#imgsettings').classList.remove('on'); };
+$('#imgsettings').onclick = function (e) { if (e.target === $('#imgsettings')) $('#imgsettings').classList.remove('on'); };
+$('#btnSaveImg').onclick = function () {
+  var base = AI.normBase($('#iBase').value.trim());
+  if (!base) { toast('先填图像接口地址'); $('#iBase').focus(); return; }
+  IMGCFG = { base: base, model: $('#iModel').value.trim(), key: $('#iKey').value,
+             suffix: $('#iSuffix').value.trim(), sizes: IMGCFG.sizes };
+  AI.imgSave(IMGCFG); imgCfgLabel(); toast('图像模型已保存');
+  setTimeout(function () { $('#imgsettings').classList.remove('on'); }, 500);
+};
+$('#btnImgPing').onclick = function () {
+  var out = $('#imgPingOut');
+  out.textContent = '正在查询模型列表…';
+  var cfg = { base: AI.normBase($('#iBase').value.trim()), model: $('#iModel').value.trim(), key: $('#iKey').value };
+  AI.imageProbe(cfg).then(function (r) {
+    out.textContent = '（' + r.ms + 'ms）' + r.msg;
+    out.style.color = r.ok ? 'var(--green)' : 'var(--red)';
+  }, function (e) { out.textContent = '自检失败：' + e.message; out.style.color = 'var(--red)'; });
+};
+
+/* 生成三比例封面。逐张串行出图（并行容易触发限流），每张回来立即显示。 */
+var IMG_RATIOS = [
+  { key: '169', label: '16:9', size: '1536x1024' },
+  { key: '43',  label: '4:3',  size: '1024x1024' },
+  { key: '34',  label: '3:4',  size: '1024x1536' }
+];
+$('#btnCovers').onclick = function () {
+  var prompt = finalPrompt();
+  if (!prompt) return toast('先选一条标题，或在「标题」框里写一句');
+  if (!IMGCFG.model) { openImgCfg(); return toast('先设置图像模型'); }
+  var btn = this, out = $('#coverOut'), hint = $('#imgHint');
+  var t0 = Date.now();
+  btn.disabled = true;
+  out.innerHTML = ''; hint.textContent = '';
+  var timer = setInterval(function () {
+    btn.textContent = '文生图出图中 ' + Math.round((Date.now() - t0) / 1000) + 's';
+  }, 500);
+  function done() {
+    clearInterval(timer);
+    btn.disabled = false; btn.textContent = '生成封面图（三比例）';
+  }
+  function slot(r) {
+    var box = document.createElement('div'); box.className = 'cov';
+    var wh = CoverRender.RATIOS[r.key];
+    box.innerHTML = '<div class="ph">「' + r.label + '」出图中…</div>' +
+      '<div class="cap"><b>' + r.label + '</b><span>' + wh[0] + '×' + wh[1] + '</span></div>';
+    out.appendChild(box);
+    return box;
+  }
+  var slots = IMG_RATIOS.map(slot);
+  var chain = Promise.resolve(), fails = 0;
+  IMG_RATIOS.forEach(function (r, i) {
+    chain = chain.then(function () {
+      return AI.image(IMGCFG, prompt, { size: r.size }).then(function (got) {
+        return AI.toDataURL(got.src).then(function (src) {
+          return new Promise(function (res) {
+            var im = new Image();
+            im.onload = function () {
+              var cv = document.createElement('canvas');
+              CoverRender.cover(cv, r.key, im);
+              var png = CoverRender.toPNG(cv);
+              slots[i].innerHTML = '<img src="' + png + '" alt="' + r.label + ' 封面">' +
+                '<div class="cap"><b>' + r.label + '</b><span>' + CoverRender.RATIOS[r.key][0] + '×' + CoverRender.RATIOS[r.key][1] + '</span>' +
+                '<span class="grow"></span><a class="btn small ghost" download="cover-' + r.label.replace(':', 'x') + '.png" href="' + png + '">下载</a></div>';
+              res();
+            };
+            im.onerror = function () { fails++; slots[i].innerHTML = '<div class="ph err">图片加载失败（返回的不是可读图片）</div>'; res(); };
+            im.src = src;
+          });
+        });
+      }).catch(function (e) {
+        fails++;
+        slots[i].innerHTML = '<div class="ph err">出图失败：' + esc(String(e.message || e).slice(0, 160)) + '</div>';
+      });
+    });
+  });
+  chain.then(function () {
+    done();
+    var ms = Math.round((Date.now() - t0) / 1000);
+    if (fails === IMG_RATIOS.length) hint.textContent = '三张全部失败，检查「设置图像模型」里的地址和模型名';
+    else if (fails) hint.textContent = '完成 ' + (IMG_RATIOS.length - fails) + '/' + IMG_RATIOS.length + '，失败 ' + fails + ' 张（每张约 ' + ms + ' 秒，可重试或调整提示词）';
+    else hint.textContent = '三张封面已生成（共 ' + ms + ' 秒）：模型出图 → 本地居中裁成精确比例。不满意可改提示词再生成。';
+  });
+};
+
+/* ---------------------------------------------------------- 导入导出 / 复制 */
+$('#btnExport').onclick = function () {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(SB, null, 2)], { type: 'application/json' }));
+  a.download = (SB.title || 'storyboard') + '.json'; a.click(); a.remove();
+};
+$('#impFile').onchange = function () {
+  var f = this.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function () {
+    try {
+      var o = JSON.parse(r.result);
+      if (o.pages) { SB = o; persist(); $('#projName').value = SB.title || ''; renderPages(); fillThemes(); buildDeck(); toast('已导入 ' + o.pages.length + ' 页'); }
+    } catch (e) { toast('这个文件不是分镜 JSON'); }
+  };
+  r.readAsText(f);
+};
+function copy(text, msg) {
+  var done = function () { toast(msg || '已复制'); };
+  if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(done, fb); } else { fb(); }
+  function fb() {
+    var ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败'); }
+    ta.remove();
+  }
+}
+
+/* ------------------------------------------------------------------ 启动 */
+/* 注意：启动时不调 buildDeck()——首次打开预览窗保持空白，
+   等用户点「生成演示」（或分镜/导入/换主题）才出片。否则会显示上次生成的旧 HTML。 */
+stripCoverPages(); renderPages(); drawTitles(); renderTags(); fillCover(); brainState(); fillThemes();
+$('#projName').value = SB.title || '';
+</script>
+</body>
+</html>

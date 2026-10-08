@@ -337,6 +337,16 @@
      配置与对话模型完全分开——出图常常是另一家服务、另一个 key。 */
   var IMG_KEY = 'knote.ai.image.v1';
   var IMG_SIZES = { '169': '1792x1024', '43': '1024x1024', '34': '1024x1792' };
+  /* 每个比例给一句话版式约束：模型自由出图时文字容易铺满或压边，本地只居中裁到精确比例、不会重排文字，
+     所以构图安全区必须写进提示词。按请求的 size 匹配，让三张各按自己的构图出，文字不撞裁切边缘。 */
+  var IMG_SAFETY = {
+    '1792x1024': '这是一张 16:9 横版封面。主体水平居中略偏低，标题等文字紧凑收在画面中线偏上的一块，四边各留约 15% 安全空白，任何文字不得贴近左右或上下边缘。',
+    '1024x1024': '这是一张 1:1 方版封面。主体居中，文字收在中心区域，四周留足等宽安全边距，标题与副文案不贴边。',
+    '1024x1792': '这是一张 3:4 竖版封面。主体落在画面中上部，文字收在偏上方的方框内，底部与左右留安全空白，避免文字被上下裁切。'
+  };
+  function imgSafetyNote(size) {
+    return IMG_SAFETY[size] || '画面主体居中、文字收在中心安全区，四周留安全边距，不贴近任一边缘。';
+  }
   var DEFAULT_IMG = {
     base: 'https://api.openai.com/v1',
     model: '',
@@ -432,7 +442,11 @@
     function attempt(i, withFormat) {
       if (i >= list.length) throw last;
       var body = { model: cfg.model, prompt: String(prompt), n: 1 };
-      if (opt.size) body.size = opt.size;
+      if (opt.size) {
+        body.size = opt.size;
+        /* 按目标比例注入构图安全区，让文字不压到裁切边（本地不重排文字） */
+        body.prompt = body.prompt + '\n\n【版式要求（必须遵守）】' + imgSafetyNote(opt.size);
+      }
       if (withFormat) body.response_format = 'b64_json';
       return send(list[i] + '/images/generations', {
         method: 'POST', headers: authHeader(cfg), body: JSON.stringify(body)
@@ -721,7 +735,7 @@
   /* 引擎版本，给页面自证用。浏览器对本地脚本的缓存很顽固：改了引擎不强刷，
      就可能页面是新的、ai.js 是旧的——混用的症状（按钮有进度字但数字一动不动、
      请求其实还是非流式的）非常像"上游挂了"，白查半天。 */
-  window.KN_AI_VERSION = '1.0.10';
+  window.KN_AI_VERSION = '1.0.11';
 
   window.AI = {
     load: load, save: save, normBase: normBase, candidates: candidates, proxyBase: proxyBase,

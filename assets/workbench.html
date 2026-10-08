@@ -218,7 +218,6 @@
       <span class="hint" id="stageInfo" style="margin:0">右侧是生成的演示预览</span>
       <span class="grow"></span>
       <button class="btn small ghost" id="btnReload">重载</button>
-      <a class="btn small ghost" id="btnNewTab" target="_blank" rel="noopener">新窗口打开</a>
     </div>
     <div class="frame"><iframe id="deck" title="演示预览"></iframe></div>
   </div>
@@ -275,14 +274,14 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="tools/deck-engine.js?v=1.0.10"></script>
-<script src="tools/cover-render.js?v=1.0.10"></script>
-<script src="tools/ai.js?v=1.0.10"></script>
+<script src="tools/deck-engine.js?v=1.0.12"></script>
+<script src="tools/cover-render.js?v=1.0.12"></script>
+<script src="tools/ai.js?v=1.0.12"></script>
 <script>
 /* 引擎自证：页面期望的版本 vs ai.js 实际报出来的版本。对不上就当场说清楚——
    本地脚本被浏览器缓存住时，表现为"按钮有进度字但数字一动不动"，看着像上游挂了。 */
 (function () {
-  var EXPECT = '1.0.10';
+  var EXPECT = '1.0.12';
   window.addEventListener('DOMContentLoaded', function () {
     var got = window.KN_AI_VERSION;
     if (got === EXPECT) return;
@@ -493,10 +492,13 @@ function fillFields(box, p) {
 }
 
 $('#btnAddPage').onclick = function () { SB.pages.push(DeckEngine.blank()); persist(); renderPages(); };
-/* 项目名留空时，用首页标题兜一个，省得每次都叫「未命名项目」 */
-function autoTitle() {
+/* 项目名：force=true 时用新分镜第一页标题覆盖（新的分镜文案进来就该自动对应上新标题）；
+   否则只在留空/未命名时兜一个，省得每次叫「未命名项目」。 */
+function refreshTitle(force) {
   var cur = $('#projName').value.trim();
-  if (cur && cur !== '未命名项目') return;
+  if (!force) {
+    if (cur && cur !== '未命名项目') return;
+  }
   var t = (SB.pages[0] && (SB.pages[0].title || SB.pages[0].kicker)) || '';
   if (!t) return;
   SB.title = t.replace(/[。！？]$/, '').slice(0, 24);
@@ -532,7 +534,7 @@ $('#btnAIBoard').onclick = function () {
   }
   progress({ chars: 0 });
   AI.storyboard(CFG, text, Math.min(9, Math.max(6, Math.round(text.length / 140))), progress, { theme: SB.theme || 'keynote' }).then(function (pages) {
-    SB.pages = pages.filter(function (p) { return p.type !== 'cover'; }); persist(); renderPages(); renderTags(); autoTitle();
+    SB.pages = pages.filter(function (p) { return p.type !== 'cover'; }); persist(); renderPages(); renderTags(); refreshTitle(true);
     toast('模型设计好 ' + SB.pages.length + ' 页（' + Math.round((Date.now() - t0) / 1000) + ' 秒），正在生成并校验');
     buildDeck();                        // 直接出片，让本地校验器立刻量一遍
     switchTab('deck');
@@ -589,7 +591,6 @@ function buildDeck() {
   if (deckURL) URL.revokeObjectURL(deckURL);
   deckURL = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
   $('#deck').src = deckURL;
-  $('#btnNewTab').href = deckURL;
   var n = SB.pages.length;
   $('#deckInfo').innerHTML = '已生成 <b>' + n + '</b> 页 · ' + (html.length / 1024).toFixed(1) + ' KB · 单文件零依赖。<br>' +
     '右侧预览：<b>空格</b> 逐步入场，<b>← →</b> 翻页，<b>R</b> 重播本页。';

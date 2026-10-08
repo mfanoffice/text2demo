@@ -735,7 +735,7 @@
   /* 引擎版本，给页面自证用。浏览器对本地脚本的缓存很顽固：改了引擎不强刷，
      就可能页面是新的、ai.js 是旧的——混用的症状（按钮有进度字但数字一动不动、
      请求其实还是非流式的）非常像"上游挂了"，白查半天。 */
-  window.KN_AI_VERSION = '1.0.11';
+  window.KN_AI_VERSION = '1.0.12';
 
   window.AI = {
     load: load, save: save, normBase: normBase, candidates: candidates, proxyBase: proxyBase,

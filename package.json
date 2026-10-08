@@ -49,5 +49,10 @@
     "build:assets": "node scripts/build-assets.mjs",
     "check:package": "node scripts/check-package.mjs",
     "prepack": "node scripts/build-assets.mjs && node scripts/check-package.mjs"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfanoffice/text2demo.git"
+  },
+  "homepage": "https://github.com/mfanoffice/text2demo"
 }

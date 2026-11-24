@@ -3,7 +3,7 @@
 > 源码仓库：https://github.com/mfanoffice/text2demo 
 
 把一段口播文案变成可翻页、可逐步入场的演示动画，顺手生成视频标题、标签和三种比例的封面。
-给**自己在本机用**：不上架、不上传、不投稿。
+业务数据留在本机；模型请求只发送到你**自己填写的接口**。
 
 ## 它解决什么
 
@@ -79,7 +79,8 @@ dsh plugin --profile web add --config.auto-install-peers=false ./dsh-deck-workbe
 
 ## 已知边界
 
-- **工作台身份用的是本机占位仓库地址** `https://github.com/dsh-local/dsh-deck-workbench`：Desktop 用它解析工作台身份（owner/repo）。本工作台不上架，这个地址只在本机生效；以后真要发布，换仓库地址等于换身份，需要按规范处理已有会话归属。
+- **工作台身份与市场条目一致**：客户端注册声明 `https://github.com/mfanoffice/text2demo`，与 `package.json` 的 `repository`、市场条目 `mfanoffice/text2demo` 相同，Desktop 会统一规范化为 `mfanoffice/text2demo`。
+- **1.0.14 修复了身份不一致**：1.0.13 及以前误用本机占位地址 `https://github.com/dsh-local/dsh-deck-workbench`，与市场条目冲突，注册会失败。升级后工作台身份从旧占位身份变为 `mfanoffice/text2demo`；旧身份下的会话不会自动迁移，业务数据仍保存在浏览器 localStorage。
 - 面板复用工作台原有的整套界面（同源 iframe），没有为 DSH 重画一套 UI。
 - 业务面板固定在右侧、宽度 0.7：工作台界面本身是「编辑区 + 预览区」双栏，窄了不好用。
 - 业务面板必须声明 `embedded: true`（宿主未写进规范文档的字段）：它让宿主把面板容器从「带内边距的可滚动块」

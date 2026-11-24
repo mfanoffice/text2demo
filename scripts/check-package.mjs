@@ -15,6 +15,7 @@ const notes = []
 const ok = []
 const say = (list, text) => list.push(text)
 const exists = async (rel) => { try { await stat(join(ROOT, rel)); return true } catch { return false } }
+const normalizeRepo = (url) => String(url || '').trim().replace(/\.git$/i, '').replace(/\/+$/, '').toLowerCase()
 
 const pkg = JSON.parse(await readFile(join(ROOT, 'package.json'), 'utf8'))
 
@@ -66,8 +67,17 @@ else {
   else if (id !== pkg.name) say(problems, `客户端模块 id(${id}) 必须与包名(${pkg.name})一致`)
   else say(ok, `客户端模块 id=${id}`)
   if (!/ctx\.desktopWorkbenches\.register\(/.test(code)) say(problems, '客户端没有调用 ctx.desktopWorkbenches.register()')
-  if (!/repository:\s*'https:\/\/github\.com\/[^']+'/.test(code)) say(problems, 'register() 没有提供规范的 GitHub repository URL')
-  else say(ok, 'register() 提供 repository / title / 业务组件')
+  const registerRepo = /repository:\s*'([^']+)'/.exec(code)?.[1]
+  if (!registerRepo) say(problems, 'register() 没有提供规范的 GitHub repository URL')
+  else if (!/^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/.test(registerRepo)) say(problems, `register() 的 repository 不是规范的 GitHub 仓库地址：${registerRepo}`)
+  else {
+    say(ok, `register() repository=${registerRepo}`)
+    const packageRepo = pkg.repository?.url
+    if (!packageRepo) say(problems, 'register() 填了 repository，但 package.json.repository 缺失')
+    else if (normalizeRepo(registerRepo) !== normalizeRepo(packageRepo)) {
+      say(problems, `register() repository(${normalizeRepo(registerRepo)}) 必须与 package.json.repository(${normalizeRepo(packageRepo)}) 一致`)
+    } else say(ok, `register() 与 package.json 的工作台身份一致：${normalizeRepo(packageRepo)}`)
+  }
   if (/register\(\{[^}]*\bid:\s*['"]/.test(code)) say(notes, '新包不应填写 register({ id })')
 }
 
